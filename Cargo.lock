@@ -895,6 +895,7 @@ dependencies = [
  "http",
  "http-body",
  "hyper",
+ "jsonwebtoken",
  "jsonwebtoken-google",
  "lazy_static",
  "lettre",
