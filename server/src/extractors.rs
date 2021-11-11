@@ -41,7 +41,9 @@ where
         .headers()
         .unwrap()
         .get(http::header::AUTHORIZATION)
-        .ok_or(TokenError::MissingHeader)?
+        .ok_or(TokenError {
+            description: "MissingHeader".to_string(),
+        })?
         .to_str()
         .map_err(|err| AuthError::InvalidAuthorizationHeader(err.to_string()))?;
 
