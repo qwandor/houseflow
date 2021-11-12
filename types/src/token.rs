@@ -125,7 +125,7 @@ impl<P: ser::Serialize + de::DeserializeOwned> Token<P> {
     }
 
     /// Validate the signature, and the expiry if it is present.
-    pub fn decode(key: &[u8], token: &str) -> Result<Self, Error> {
+    pub fn decode(key: &[u8], token: &str) -> Result<TokenData<P>, Error> {
         // Hack to allow tokens without "exp", but validate it if it is present.
         let unvalidated_data: TokenData<BasePayload> = dangerous_insecure_decode(token)?;
         let validation = Validation {
@@ -133,12 +133,7 @@ impl<P: ser::Serialize + de::DeserializeOwned> Token<P> {
             ..Validation::default()
         };
 
-        let data = decode(token, &DecodingKey::from_secret(key), &validation)?;
-        Ok(Self {
-            header: data.header,
-            payload: data.claims,
-            encoded: token.to_owned(),
-        })
+        Ok(decode(token, &DecodingKey::from_secret(key), &validation)?)
     }
 }
 
@@ -167,7 +162,8 @@ mod tests {
             let token = AccessToken::new(&key, payload);
             let encoded = token.encode();
             let decoded = AccessToken::decode(&key, &encoded).unwrap();
-            assert_eq!(token, decoded);
+            assert_eq!(token.header, decoded.header);
+            assert_eq!(token.payload, decoded.claims);
         }
 
         #[test]
@@ -222,7 +218,8 @@ mod tests {
             let token = RefreshToken::new(&key, payload);
             let encoded = token.encode();
             let decoded = RefreshToken::decode(&key, &encoded).unwrap();
-            assert_eq!(token, decoded);
+            assert_eq!(token.header, decoded.header);
+            assert_eq!(token.payload, decoded.claims);
         }
 
         #[test]
@@ -235,7 +232,8 @@ mod tests {
             let token = RefreshToken::new(&key, payload);
             let encoded = token.encode();
             let decoded = RefreshToken::decode(&key, &encoded).unwrap();
-            assert_eq!(token, decoded);
+            assert_eq!(token.header, decoded.header);
+            assert_eq!(token.payload, decoded.claims);
         }
 
         #[test]

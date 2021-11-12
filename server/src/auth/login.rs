@@ -149,7 +149,7 @@ mod tests {
             AccessToken::decode(state.config.secrets.access_key.as_bytes(), &at).unwrap(),
             RefreshToken::decode(state.config.secrets.refresh_key.as_bytes(), &rt).unwrap(),
         );
-        assert_eq!(at.sub, rt.sub);
+        assert_eq!(at.claims.sub, rt.claims.sub);
     }
 
     #[tokio::test]

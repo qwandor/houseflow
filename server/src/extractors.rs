@@ -56,8 +56,10 @@ where
         return Err(AuthError::InvalidAuthorizationHeader(schema.to_string()));
     }
 
-    let token = Token::<P>::decode(get_key_fn(&state.config.secrets).as_bytes(), token)?;
-    Ok(token.into())
+    Ok(Token::<P>::decode(
+        get_key_fn(&state.config.secrets).as_bytes(),
+        token,
+    )?)
 }
 
 #[async_trait]

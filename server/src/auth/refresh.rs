@@ -72,6 +72,6 @@ mod tests {
             &response.access_token,
         )
         .unwrap();
-        assert_eq!(access_token.sub, refresh_token.sub);
+        assert_eq!(access_token.claims.sub, refresh_token.sub);
     }
 }
