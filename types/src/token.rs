@@ -80,17 +80,17 @@ struct BasePayload {
 }
 
 impl<P: ser::Serialize + de::DeserializeOwned> Token<P> {
-    pub fn new(key: &[u8], payload: P) -> Self {
+    pub fn new(key: &[u8], payload: P) -> Result<Self, Error> {
         const ALGORITHM: Algorithm = Algorithm::HS256; // that can be changed in the future
 
         let header = Header::new(ALGORITHM);
-        let encoded = encode(&header, &payload, &EncodingKey::from_secret(key)).unwrap(); // TODO
+        let encoded = encode(&header, &payload, &EncodingKey::from_secret(key))?;
 
-        Self {
+        Ok(Self {
             header,
             payload,
             encoded,
-        }
+        })
     }
 
     pub fn encode(&self) -> String {
@@ -159,7 +159,7 @@ mod tests {
                 sub: Uuid::new_v4(),
                 exp: Utc::now().round_subsecs(0) + chrono::Duration::hours(1),
             };
-            let token = AccessToken::new(&key, payload);
+            let token = AccessToken::new(&key, payload).unwrap();
             let encoded = token.encode();
             let decoded = AccessToken::decode(&key, &encoded).unwrap();
             assert_eq!(token.header, decoded.header);
@@ -174,7 +174,7 @@ mod tests {
                 sub: Uuid::new_v4(),
                 exp: Utc::now() - expired_by,
             };
-            let token = AccessToken::new(&key, payload);
+            let token = AccessToken::new(&key, payload).unwrap();
             let encoded = token.encode();
             let err = Token::<AccessTokenPayload>::decode(&key, &encoded).unwrap_err();
             assert_eq!(
@@ -193,7 +193,7 @@ mod tests {
                 sub: Uuid::new_v4(),
                 exp: Utc::now() - chrono::Duration::hours(1),
             };
-            let token = AccessToken::new(&valid_key, payload);
+            let token = AccessToken::new(&valid_key, payload).unwrap();
             let encoded = token.encode();
             let err = AccessToken::decode(&invalid_key, &encoded).unwrap_err();
             assert_eq!(
@@ -215,7 +215,7 @@ mod tests {
                 sub: Uuid::new_v4(),
                 exp: Some(Utc::now().round_subsecs(0) + chrono::Duration::hours(1)),
             };
-            let token = RefreshToken::new(&key, payload);
+            let token = RefreshToken::new(&key, payload).unwrap();
             let encoded = token.encode();
             let decoded = RefreshToken::decode(&key, &encoded).unwrap();
             assert_eq!(token.header, decoded.header);
@@ -229,7 +229,7 @@ mod tests {
                 sub: Uuid::new_v4(),
                 exp: None,
             };
-            let token = RefreshToken::new(&key, payload);
+            let token = RefreshToken::new(&key, payload).unwrap();
             let encoded = token.encode();
             let decoded = RefreshToken::decode(&key, &encoded).unwrap();
             assert_eq!(token.header, decoded.header);
@@ -244,7 +244,7 @@ mod tests {
                 sub: Uuid::new_v4(),
                 exp: Some(Utc::now() - expired_by),
             };
-            let token = Token::new(&key, payload);
+            let token = Token::new(&key, payload).unwrap();
             let encoded = token.encode();
             let err = RefreshToken::decode(&key, &encoded).unwrap_err();
             assert_eq!(
@@ -263,7 +263,7 @@ mod tests {
                 sub: Uuid::new_v4(),
                 exp: Some(Utc::now().round_subsecs(0) + chrono::Duration::hours(1)),
             };
-            let token = RefreshToken::new(&valid_key, payload);
+            let token = RefreshToken::new(&valid_key, payload).unwrap();
             let encoded = token.encode();
             let err = RefreshToken::decode(&invalid_key, &encoded).unwrap_err();
             assert_eq!(

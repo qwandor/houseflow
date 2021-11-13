@@ -81,7 +81,7 @@ async fn on_refresh_token_grant(
             sub: refresh_token.claims.sub,
             exp: Utc::now() + expires_in,
         },
-    );
+    )?;
 
     Ok(Response {
         access_token: access_token.to_string(),
@@ -112,7 +112,7 @@ async fn on_authorization_code_grant(state: State, code: String) -> Result<Respo
             sub: code.claims.sub,
             exp: Utc::now() + expires_in,
         },
-    );
+    )?;
 
     let refresh_token = RefreshToken::new(
         state.config.secrets.refresh_key.as_bytes(),
@@ -120,7 +120,7 @@ async fn on_authorization_code_grant(state: State, code: String) -> Result<Respo
             sub: code.claims.sub,
             exp: None,
         },
-    );
+    )?;
 
     Ok(Response {
         access_token: access_token.to_string(),

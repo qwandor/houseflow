@@ -24,7 +24,7 @@ pub async fn handle(
     let access_token = AccessToken::new(
         state.config.secrets.access_key.as_bytes(),
         access_token_payload,
-    );
+    )?;
 
     tracing::event!(Level::INFO, user_id = %refresh_token.claims.sub, "Refreshed token");
 
@@ -59,7 +59,8 @@ mod tests {
                 sub: user.id.clone(),
                 exp: None,
             },
-        );
+        )
+        .unwrap();
         let Json(response) = super::handle(
             state.clone(),
             crate::extractors::RefreshToken(refresh_token.clone().into()),
