@@ -2,6 +2,7 @@
 
 pub mod device;
 pub mod execute;
+pub mod platform;
 pub mod query;
 pub mod sync;
 
